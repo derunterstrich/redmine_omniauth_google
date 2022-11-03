@@ -84,9 +84,9 @@ class RedmineOauthController < AccountController
 
   def oauth_client
     @client ||= OAuth2::Client.new(settings[:client_id], settings[:client_secret],
-      :site => 'https://oauth2.googleapis.com',
-      :authorize_url => 'https://accounts.google.com/o/oauth2/auth',
-      :token_url => '/token')
+      :site => 'https://accounts.google.com',
+      :authorize_url => '/o/oauth2/auth',
+      :token_url => '/o/oauth2/token')
   end
 
   def settings
