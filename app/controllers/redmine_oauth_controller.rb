@@ -19,11 +19,11 @@ class RedmineOauthController < AccountController
       redirect_to signin_path
     else
       token = oauth_client.auth_code.get_token(params[:code], :redirect_uri => oauth_google_callback_url)
-      result = token.get('https://www.googleapis.com/oauth2/v1/userinfo')
+      result = token.get('https://www.googleapis.com/oauth2/v3/userinfo')
       info = JSON.parse(result.body)
       if info && info["verified_email"]
         if allowed_domain_for?(info["email"])
-          try_to_login info
+          try_to_login(info)
         else
           flash[:error] = l(:notice_domain_not_allowed, :domain => parse_email(info["email"])[:domain])
           redirect_to signin_path
@@ -35,7 +35,7 @@ class RedmineOauthController < AccountController
     end
   end
 
-  def try_to_login info
+  def try_to_login(info)
    params[:back_url] = session[:back_url]
    session.delete(:back_url)
    user = User.joins(:email_addresses).where(:email_addresses => { :address => info["email"] }).first_or_create
@@ -84,9 +84,9 @@ class RedmineOauthController < AccountController
 
   def oauth_client
     @client ||= OAuth2::Client.new(settings[:client_id], settings[:client_secret],
-      :site => 'https://accounts.google.com',
-      :authorize_url => '/o/oauth2/auth',
-      :token_url => '/o/oauth2/token')
+      :site => 'https://oauth2.googleapis.com',
+      :authorize_url => 'https://accounts.google.com/o/oauth2/auth',
+      :token_url => '/token')
   end
 
   def settings
